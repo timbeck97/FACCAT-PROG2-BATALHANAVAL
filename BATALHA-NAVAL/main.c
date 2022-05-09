@@ -4,52 +4,134 @@
 
 int tabuleiro[20][20];
 
+void digitaPosicao2(int posicao[]);
+
 void preencheMatrizInicial();
 void imprimeMatriz();
 void imprimeMatrizAlvosAcertados();
 void digitaPosicao(int posicao[]);
+void digitaPosicao2(int posicao[]);
 void colocaNavio(int posicao[], int valor);
-int procuraNavio(int posicao[],int *pontos, int *navio1, int *navio2, int *navio3);
+int procuraNavio(int posicao[],int *pontos, int *navio1, int *navio2, int *navio3, int *tentativas);
 void navioDestruido();
+int retornaQuemGanhou(int pontos, int tentativas);
+void digitaNomeJogadores(char* jogador1, char* jogador2);
+void retornaJogador(int rodada, char* jogador1, char* jogador2);
+int jogarNovamente();
+void limpaBuffer();
+//CONSTANTES ABAIXO UTILIZADAS PARA TESTE DO ALGORITMO (AI O JOGO ENCERRA MAIS RAPIDO) mas o padrao é pontosparaganhar=15  e tentativastotais = 30
+#define PONTOSPARAGANHAR 2
+#define TENTATIVASTOTAIS 4
+
 int main()
 {   int posicao[2];
-    int pontos=0;
+    int pontos=0, tentativas=0, rodada=0, continuar=1;
     int navio1=0, navio2=0, navio3=0;
+    char jogador1[30], jogador2[30];
     preencheMatrizInicial();
 
 
-    for(int i=1;i<=3;i++){
 
-        system("clear");
-        imprimeMatriz();
-        colocaNavio(posicao, i);
+
+    digitaNomeJogadores(jogador1, jogador2);
+
+    while(continuar){
+        for(int i=1;i<=3;i++){
+            system("clear");
+            imprimeMatriz();
+            printf("Jogador colocando navio: ");
+            retornaJogador(rodada, jogador1, jogador2);
+            colocaNavio(posicao, i);
+        }
+
+
+        int result=10;
+
+        int quemGanhou=0;
+
+        while(!quemGanhou){
+            system("clear");
+            imprimeMatrizAlvosAcertados();
+            printf("Jogador Atirando: ");
+            retornaJogador(rodada, jogador2, jogador1);
+            printf("Quantidade de pontos: %d --- Quantidade de tiros: %d\n",pontos,tentativas);
+            navioDestruido(navio1,navio2,navio3);
+            if(result==1)printf("Acertou o navio!\n");
+            else if(result==0)printf("Errou o navio!\n");
+            result = procuraNavio(posicao, &pontos, &navio1, &navio2, &navio3, &tentativas);
+            quemGanhou=retornaQuemGanhou(pontos, tentativas);
+            if(quemGanhou==1){
+                printf("Jogador vencedor: ");
+                retornaJogador(rodada, jogador2, jogador1);
+            }
+            else if(quemGanhou==2){
+                printf("Jogador vencedor: ");
+                retornaJogador(rodada, jogador1, jogador2);
+            }
+        }
+
+        continuar=jogarNovamente();
+        if(continuar){
+            preencheMatrizInicial();
+            navio1=0, navio2=0, navio3=0, pontos=0, tentativas=0;
+            rodada++;
+        }
+
     }
-    system("clear");
-    int result=10;
 
-    while(1){
-
-        system("clear");
-        imprimeMatriz();
-        printf("Quantidade de pontos: %d\n",pontos);
-        navioDestruido(navio1,navio2,navio3);
-        if(result==1)printf("Acertou o navio!\n");
-        else if(result==0)printf("Errou o navio!\n");
-        result = procuraNavio(posicao, &pontos, &navio1, &navio2, &navio3);
-
-
-    }
 
 
 
     return 0;
 }
+int jogarNovamente(){
+    char escolha;
+    printf("Jogar novamente? (S/N): ");
+    scanf("%c",&escolha);
+    limpaBuffer();
+    escolha=toupper(escolha);
+    if(escolha!=83 || escolha!=78){
+        while(escolha!=83 && escolha!=78){
+            printf("Digite uma letra válida(S/N): ");
+            scanf("%c",&escolha);
+            escolha=toupper(escolha);
+            limpaBuffer();
+        }
+    }
+    if(escolha==83) return 1;
+    else return 0;
+}
+void retornaJogador(int rodada, char* jogador1, char* jogador2){
+    if(rodada%2==1) printf("%s\n",jogador1);
+    else printf("%s\n",jogador2);
+}
+
+int retornaQuemGanhou(int pontos, int tentativas){
+    if(pontos ==PONTOSPARAGANHAR) return 1;
+    else if(tentativas ==TENTATIVASTOTAIS) return 2;
+    else return 0;
+    /*
+    if(pontos ==15) return 1;
+    else if(tentativas ==30) return 2;
+    else return 0;
+    */
+
+}
+
 void navioDestruido(int navio1, int navio2, int navio3){
     int quantidade=0;
     if(navio1==5)quantidade++;
     if(navio2==5)quantidade++;
     if(navio3==5)quantidade++;
     printf("Navios destruidos: %d\n",quantidade);
+}
+void digitaNomeJogadores(char* jogador1, char* jogador2){
+    printf("Digite o nome do jogador 1: ");
+    scanf("%[^\n]",jogador1);
+    limpaBuffer();
+    printf("Digite o nome do jogador 2: ");
+    scanf("%[^\n]",jogador2);
+    limpaBuffer();
 }
 void preencheMatrizInicial(){
     for(int i=0;i<20;i++){
@@ -59,8 +141,8 @@ void preencheMatrizInicial(){
     }
 }
 void imprimeMatriz(){
-    //codigo abaixo para imprimi
-    printf("    ");
+    //codigo abaixo para imprimi a matriz
+    printf("   ");
     for(int a=1;a<=9;a++) printf("%d ",a);
     for(int a=0;a<=9;a++) printf("%d ",a);
     printf("0");
@@ -68,12 +150,12 @@ void imprimeMatriz(){
 
     printf("\n");
     for(int i=0;i<20;i++){
-        printf("%c - ",i+65);
+        printf("%c |",i+65);
         for(int j=0;j<20;j++){
 
-            printf("");
-            if(tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf("x-");
-            else{printf("0-");}
+
+            if(tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf("x|");
+            else{printf(" |");}
             //printf("%d-",tabuleiro[i][j]);
         }
 
@@ -82,8 +164,8 @@ void imprimeMatriz(){
 }
 void imprimeMatrizAlvosAcertados(){
 
-    //codigo abaixo para imprimi
-    printf("    ");
+    //codigo abaixo para imprimi a matriz com os alvos que foram acertados ou errados
+    printf("   ");
     for(int a=1;a<=9;a++) printf("%d ",a);
     for(int a=0;a<=9;a++) printf("%d ",a);
     printf("0");
@@ -91,38 +173,101 @@ void imprimeMatrizAlvosAcertados(){
 
     printf("\n");
     for(int i=0;i<20;i++){
-        printf("%c - ",i+65);
+        printf("%c |",i+65);
         for(int j=0;j<20;j++){
 
             printf("");
-            if(tabuleiro[i][j]==0 || tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf(" -"); //se estiver vazio ou tiver navio imprime espaço
-            else if(tabuleiro[i][j]==8) printf("1-"); //se tiver 8 quer dizer que essa posicao tem navio e foi acertada pelo jogador ai imprime 1
-            else if(tabuleiro[i][j]==9) printf("0-"); //se tiver 9 quer dizer que o jogador atirou e errou ai imprime 0
+            if(tabuleiro[i][j]==0 || tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf(" |"); //se estiver vazio ou tiver navio imprime espaço
+            else if(tabuleiro[i][j]==8) printf("1|"); //se tiver 8 quer dizer que essa posicao tem navio e foi acertada pelo jogador ai imprime 1
+            else if(tabuleiro[i][j]==9) printf("0|"); //se tiver 9 quer dizer que o jogador atirou e errou ai imprime 0
         }
 
     printf("\n");
     }
 }
-
+void limpaBuffer(){
+    int ch;
+    do {
+        ch = fgetc(stdin);
+    } while (ch != EOF && ch != '\n');
+}
+//metodo de entrada de dadas em uma linha (ex: a1, b15, d10....)
 void digitaPosicao(int posicao[]){
+    char dado[3];
+    int tamanho;
+    printf("Digite a posicao (ex: a5)");
+    scanf("%[^\n]",dado);
+    limpaBuffer();
+    tamanho=strlen(dado);
+    dado[0]=toupper(dado[0]);
+    while(tamanho!= 2 && tamanho !=3){
+        printf("Digite uma posicao correta: ");
+        scanf("%[^\n]",dado);
+        limpaBuffer();
+        tamanho=strlen(dado);
+        dado[0]=toupper(dado[0]);
+    }
+        if(tamanho==2){ //caso tenha digitado coluna menor que 10 cai nesse if
+            while((dado[0]<65 || dado[0]>84) || (dado[1]<49 || dado[1] >57)){ // verifica se o primeiro digito é letra e o segundo se é um numero de 1 a 9 (2 digitos, ex: a8)
+                printf("Digite uma posicao correta: ");
+                scanf("%[^\n]",dado);
+                limpaBuffer();
+                dado[0]=toupper(dado[0]);
+            }
+            posicao[0]=dado[0]-64;
+            posicao[1]=dado[1]-48;
+        }else if(tamanho==3){ //caso a coluna seja maior que 9 (3 digitos, exempo a15)
+            while((dado[0]<65 || dado[0]>84)){ //vefica se a letra da coluna digitada é valida
+                printf("Digite uma posicao correta: ");
+                scanf("%[^\n]",dado);
+                limpaBuffer();
+                dado[0]=toupper(dado[0]);
+            }
+            posicao[0]=dado[0]-64; //atribui o numero da linha na posicao 1 do vetor
+            while((dado[1]<48 || dado[1]>57) || (dado[2]<48 || dado[2] >57)){ //verifica se os 2 digitos da coluna sao numeros de 0 a 9
+                printf("Digite uma posicao correta: ");
+                scanf("%[^\n]",dado);
+                limpaBuffer();
+
+            }
+            //abaixo os valores sao salvos no vetor (a coluna)
+            char arr[3];
+            arr[0]=dado[1];
+            arr[1]=dado[2];
+            arr[2]='\0';
+            posicao[1]=atoi(arr);
+            while(posicao[1]<10 || posicao[1]>20){ //verifica se a coluna esta entre 1 e 20 e se nao estiver pede pra digitar de novo)
+                printf("Digite uma posicao correta: ");
+                scanf("%[^\n]",dado);
+                limpaBuffer();
+                arr[0]=dado[1];
+                arr[1]=dado[2];
+                arr[2]='\0';
+                posicao[1]=atoi(arr);
+            }
+        }
+    //printf("linha: %d, coluna: %d\n",posicao[0],posicao[1]);
+}
+//metodo de entrada de dados em 2 linhas en: linha : a, coluna: 10,  linha:c, coluna 15....)
+void digitaPosicao2(int posicao[]){
     char linha;
     printf("Linha: ");
     scanf("%c",&linha);
     linha=toupper(linha);
-    __fpurge(stdin);
+    limpaBuffer();
     while(!(linha>=65 && linha<=84)){
         printf("Digite uma letra correta: ");
         scanf("%c",&linha);
-        __fpurge(stdin);
+        limpaBuffer();
         linha=toupper(linha);
     }
     printf("Coluna: ");
     scanf("%d",&posicao[1]);
-    __fpurge(stdin);
-    while(!(posicao[1]>=1 && posicao[1]<=20)){ //verificar essa validacao quando sobrar tempo
+    limpaBuffer();
+    while(posicao[1]<1 || posicao[1]>20){ //verificar essa validacao quando sobrar tempo
         printf("Digite um numero entre 1 e 20: ");
-        scanf("%c",&linha);
-        __fpurge(stdin);
+        scanf("%d",&posicao[1]);
+        limpaBuffer();
     }
     posicao[0]=toupper(linha)-64;
     //printf("Linha: %d, Coluna: %d\n",posicao[0],posicao[1]);
@@ -132,12 +277,12 @@ void colocaNavio(int posicao[], int valor){
     char vh;
     printf("Digite V para vertical ou H para horizontal: ");
     scanf("%c",&vh);
-    __fpurge(stdin);
+    limpaBuffer();
     vh=toupper(vh);
     while(vh!=72 && vh!=86){
         printf("Digite uma letra valida: ");
         scanf("%c",&vh);
-        __fpurge(stdin);
+        limpaBuffer();
         vh=toupper(vh);
     }
 
@@ -253,39 +398,44 @@ void colocaNavio(int posicao[], int valor){
     }while(validaPosicao==1);
     imprimeMatriz();
 }
-int procuraNavio(int posicao[],int *pontos, int *navio1, int *navio2, int *navio3){ //retorna 1 se acertar alvo, 2 se o alvo
+int procuraNavio(int posicao[],int *pontos, int *navio1, int *navio2, int *navio3, int *tentativas){ //retorna 1 se acertar alvo, 2 se o alvo
 
     digitaPosicao(posicao);
     int linha = posicao[0]-1;
     int coluna = posicao[1]-1;
 
-    if(tabuleiro[linha][coluna]==1){
-        tabuleiro[linha][coluna]=8;
+    if(tabuleiro[linha][coluna]==1){ //se acertar um navio soma pontos, soma um acerto no navio e soma tentativa
+        tabuleiro[linha][coluna]=8; // define 8 na posicao digitada para sinalizar q acertou algum navio
         *pontos=*pontos+1;
         *navio1=*navio1+1;
+        *tentativas=*tentativas+1;
         return 1;
     }
-    else if(tabuleiro[linha][coluna]==2){
-        tabuleiro[linha][coluna]=8;
+    else if(tabuleiro[linha][coluna]==2){ //se acertar um navio soma pontos, soma um acerto no navio e soma tentativa
+        tabuleiro[linha][coluna]=8; // define 8 na posicao digitada para sinalizar q acertou algum navio
         *pontos=*pontos+1;
         *navio2=*navio2+1;
+        *tentativas=*tentativas+1;
         return 1;
     }
-    else if(tabuleiro[linha][coluna]==3){
-        tabuleiro[linha][coluna]=8;
+    else if(tabuleiro[linha][coluna]==3){ //se acertar um navio soma pontos, soma um acerto no navio e soma tentativa
+        tabuleiro[linha][coluna]=8; // define 8 na posicao digitada para sinalizar q acertou algum navio
         *pontos=*pontos+1;
         *navio3=*navio3+1;
+        *tentativas=*tentativas+1;
         return 1;
     }
-    else if(tabuleiro[linha][coluna]==8){
+    else if(tabuleiro[linha][coluna]==8 || tabuleiro[linha][coluna]==9){ //se digitar uma posicao que ja foi disparada antes (acertada ou errada)
         printf("Digite uma posicao que nao nao foi digitada antes (pressione enter para continuar)");
         getchar();
         return 3;
     }
-    else if(tabuleiro[linha][coluna]==0){
-        tabuleiro[linha][coluna] = 9;
+    else if(tabuleiro[linha][coluna]==0){ //se errar soma 1 na tentativa
+        tabuleiro[linha][coluna] = 9; //coloca 9 no tabuleiro pra sinalizar q foi uma posicao que errou
+        *tentativas=*tentativas+1;
     }
 
     system("clear");
     return 0;
 }
+
