@@ -32,7 +32,7 @@ int main()
     char jogador1[30], jogador2[30];
     preencheMatrizInicial();
 
-    imprimeMatrizAlvosAcertados();
+
 
     digitaNomeJogadores(jogador1, jogador2);
 
