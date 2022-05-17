@@ -8,6 +8,7 @@ void digitaPosicao2(int posicao[]);
 
 void preencheMatrizInicial();
 void imprimeMatriz();
+void imprimeMatriz2();
 void imprimeMatrizAlvosAcertados();
 void digitaPosicao(int posicao[]);
 void digitaPosicao2(int posicao[]);
@@ -31,6 +32,7 @@ int main()
     char jogador1[30], jogador2[30];
     preencheMatrizInicial();
 
+    imprimeMatrizAlvosAcertados();
 
     digitaNomeJogadores(jogador1, jogador2);
 
@@ -137,14 +139,7 @@ void retornaJogador(int rodada, char* jogador1, char* jogador2){
 int retornaQuemGanhou(int pontos, int tentativas){
     if(pontos ==PONTOSPARAGANHAR) return 1;
     if(tentativas ==TENTATIVASTOTAIS) return 2;
-
     return 0;
-    /*
-    if(pontos ==15) return 1;
-    else if(tentativas ==30) return 2;
-    else return 0;
-    */
-
 }
 
 void navioDestruido(int navio1, int navio2, int navio3){
@@ -171,6 +166,24 @@ void preencheMatrizInicial(){
 }
 void imprimeMatriz(){
     //codigo abaixo para imprimi a matriz
+    printf("    ");
+    for(int a=1;a<=8;a++) printf("%d   ",a);
+    printf("9  ");
+    for(int a=10;a<=20;a++) printf("%d  ",a);
+
+    printf("\n");
+    for(int i=0;i<20;i++){
+        printf("%c | ",i+65);
+        for(int j=0;j<20;j++){
+            if(tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3 || tabuleiro[i][j]==4 || tabuleiro[i][j]==5 || tabuleiro[i][j]==6)printf("x | ");
+            else{printf("  | ");}
+            //printf("%d-",tabuleiro[i][j]);
+        }
+    printf("\n");
+    }
+}
+void imprimeMatriz2(){
+    //codigo abaixo para imprimi a matriz
     printf("   ");
     for(int a=1;a<=9;a++) printf("%d ",a);
     for(int a=0;a<=9;a++) printf("%d ",a);
@@ -194,21 +207,18 @@ void imprimeMatriz(){
 void imprimeMatrizAlvosAcertados(){
 
     //codigo abaixo para imprimi a matriz com os alvos que foram acertados ou errados
-    printf("   ");
-    for(int a=1;a<=9;a++) printf("%d ",a);
-    for(int a=0;a<=9;a++) printf("%d ",a);
-    printf("0");
-
+    printf("    ");
+    for(int a=1;a<=8;a++) printf("%d   ",a);
+    printf("9  ");
+    for(int a=10;a<=20;a++) printf("%d  ",a);
 
     printf("\n");
     for(int i=0;i<20;i++){
-        printf("%c |",i+65);
+        printf("%c | ",i+65);
         for(int j=0;j<20;j++){
-
-            printf("");
-            if(tabuleiro[i][j]==0 || tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf(" |"); //se estiver vazio ou tiver navio imprime espaço
-            else if(tabuleiro[i][j]==8) printf("1|"); //se tiver 8 quer dizer que essa posicao tem navio e foi acertada pelo jogador ai imprime 1
-            else if(tabuleiro[i][j]==9) printf("0|"); //se tiver 9 quer dizer que o jogador atirou e errou ai imprime 0
+            if(tabuleiro[i][j]==0 || tabuleiro[i][j]==1 || tabuleiro[i][j]==2 || tabuleiro[i][j]==3)printf("  | "); //se estiver vazio ou tiver navio imprime espaço
+            else if(tabuleiro[i][j]==8) printf("1 | "); //se tiver 8 quer dizer que essa posicao tem navio e foi acertada pelo jogador ai imprime 1
+            else if(tabuleiro[i][j]==9) printf("0 | "); //se tiver 9 quer dizer que o jogador atirou e errou ai imprime 0
         }
 
     printf("\n");
